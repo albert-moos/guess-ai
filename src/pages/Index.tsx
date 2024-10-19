@@ -81,10 +81,10 @@ const Index = () => {
       <div className="mt-8 flex justify-center items-center">
         <Input
           type="number"
-          placeholder="How much do you want to bet?"
+          placeholder="Bet amount"
           value={betAmount}
           onChange={(e) => setBetAmount(e.target.value)}
-          className="mr-4 bg-gray-800 text-white max-w-xs"
+          className="w-32 mr-4 bg-gray-800 text-white"
         />
       </div>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
