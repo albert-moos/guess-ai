@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
@@ -16,89 +16,83 @@ const Index = () => {
   const [betAmount, setBetAmount] = useState('');
   const { toast } = useToast()
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedDirection, setSelectedDirection] = useState<'up' | 'down' | null>(null);
+  const [selectedSide, setSelectedSide] = useState<'left' | 'right' | null>(null);
 
-  const getRandomPrice = useCallback(() => {
-    return (Math.random() * 10000 + 20000).toFixed(2);
+  const getRandomImage = useCallback(() => {
+    const width = 400;
+    const height = 300;
+    return `https://picsum.photos/${width}/${height}?random=${Math.random()}`;
   }, []);
 
-  const [currentPrice, setCurrentPrice] = useState(getRandomPrice());
+  const [leftImage, setLeftImage] = useState(getRandomImage());
+  const [rightImage, setRightImage] = useState(getRandomImage());
 
-  const handleBetClick = (direction: 'up' | 'down') => {
+  const handleBetClick = (side: 'left' | 'right') => {
     if (!betAmount) {
       toast({
         title: "Bet amount required",
-        description: "Please enter a bet amount before selecting a direction.",
+        description: "Please enter a bet amount before selecting a side.",
         variant: "destructive",
       });
       return;
     }
-    setSelectedDirection(direction);
+    setSelectedSide(side);
     setIsDialogOpen(true);
   };
 
   const handleConfirmBet = () => {
-    if (selectedDirection) {
+    if (selectedSide) {
       toast({
         title: "Bet placed!",
-        description: `You bet ${betAmount} that Bitcoin will go ${selectedDirection}.`,
+        description: `You bet ${betAmount} on the ${selectedSide} image.`,
       });
-      // Simulate price change after bet
-      setTimeout(() => {
-        const newPrice = getRandomPrice();
-        setCurrentPrice(newPrice);
-        const result = (selectedDirection === 'up' && parseFloat(newPrice) > parseFloat(currentPrice)) ||
-                       (selectedDirection === 'down' && parseFloat(newPrice) < parseFloat(currentPrice));
-        toast({
-          title: result ? "You won!" : "You lost!",
-          description: `New Bitcoin price: $${newPrice}`,
-          variant: result ? "default" : "destructive",
-        });
-      }, 3000);
+      // Refresh images after bet
+      setLeftImage(getRandomImage());
+      setRightImage(getRandomImage());
       setIsDialogOpen(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-4xl font-bold text-center mb-8">Bitcoin Price Prediction</h1>
-      <div className="flex flex-col items-center gap-8">
-        <div className="text-6xl font-bold">
-          ${currentPrice}
-        </div>
-        <div className="flex gap-4">
+      <h1 className="text-4xl font-bold text-center mb-8">Guess Which One is AI</h1>
+      <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+        <div className="w-full md:w-1/2 flex flex-col items-center">
+          <img src={leftImage} alt="Left Image" className="w-full h-64 object-cover rounded-lg mb-4" />
           <Button 
-            onClick={() => handleBetClick('up')} 
-            className="w-32"
+            onClick={() => handleBetClick('left')} 
+            className="w-full max-w-xs"
             variant="outline"
           >
-            <ArrowUp className="mr-2" /> Up
+            <ArrowLeft className="mr-2" /> Left
           </Button>
+        </div>
+        <div className="w-full md:w-1/2 flex flex-col items-center">
+          <img src={rightImage} alt="Right Image" className="w-full h-64 object-cover rounded-lg mb-4" />
           <Button 
-            onClick={() => handleBetClick('down')} 
-            className="w-32"
+            onClick={() => handleBetClick('right')} 
+            className="w-full max-w-xs"
             variant="outline"
           >
-            <ArrowDown className="mr-2" /> Down
+            Right <ArrowRight className="ml-2" />
           </Button>
         </div>
-        <div className="flex items-center">
-          <Input
-            type="number"
-            placeholder="Bet amount"
-            value={betAmount}
-            onChange={(e) => setBetAmount(e.target.value)}
-            className="w-32 mr-4 bg-gray-800 text-white"
-          />
-          <span>USD</span>
-        </div>
+      </div>
+      <div className="mt-8 flex justify-center items-center">
+        <Input
+          type="number"
+          placeholder="Bet amount"
+          value={betAmount}
+          onChange={(e) => setBetAmount(e.target.value)}
+          className="w-32 mr-4 bg-gray-800 text-white"
+        />
       </div>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Your Bet</DialogTitle>
             <DialogDescription>
-              Are you sure you want to bet {betAmount} USD that Bitcoin will go {selectedDirection}?
+              Are you sure you want to bet {betAmount} on the {selectedSide} image?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
