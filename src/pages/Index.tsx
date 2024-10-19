@@ -3,10 +3,20 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 const Index = () => {
   const [betAmount, setBetAmount] = useState('');
   const { toast } = useToast()
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedSide, setSelectedSide] = useState<'left' | 'right' | null>(null);
 
   const getRandomImage = useCallback(() => {
     const width = 400;
@@ -17,7 +27,7 @@ const Index = () => {
   const [leftImage, setLeftImage] = useState(getRandomImage());
   const [rightImage, setRightImage] = useState(getRandomImage());
 
-  const handleBet = (side: 'left' | 'right') => {
+  const handleBetClick = (side: 'left' | 'right') => {
     if (!betAmount) {
       toast({
         title: "Bet amount required",
@@ -26,13 +36,21 @@ const Index = () => {
       });
       return;
     }
-    toast({
-      title: "Bet placed!",
-      description: `You bet ${betAmount} on the ${side} image.`,
-    });
-    // Refresh images after bet
-    setLeftImage(getRandomImage());
-    setRightImage(getRandomImage());
+    setSelectedSide(side);
+    setIsDialogOpen(true);
+  };
+
+  const handleConfirmBet = () => {
+    if (selectedSide) {
+      toast({
+        title: "Bet placed!",
+        description: `You bet ${betAmount} on the ${selectedSide} image.`,
+      });
+      // Refresh images after bet
+      setLeftImage(getRandomImage());
+      setRightImage(getRandomImage());
+      setIsDialogOpen(false);
+    }
   };
 
   return (
@@ -42,7 +60,7 @@ const Index = () => {
         <div className="w-full md:w-1/2 flex flex-col items-center">
           <img src={leftImage} alt="Left Image" className="w-full h-64 object-cover rounded-lg mb-4" />
           <Button 
-            onClick={() => handleBet('left')} 
+            onClick={() => handleBetClick('left')} 
             className="w-full max-w-xs"
             variant="outline"
           >
@@ -52,7 +70,7 @@ const Index = () => {
         <div className="w-full md:w-1/2 flex flex-col items-center">
           <img src={rightImage} alt="Right Image" className="w-full h-64 object-cover rounded-lg mb-4" />
           <Button 
-            onClick={() => handleBet('right')} 
+            onClick={() => handleBetClick('right')} 
             className="w-full max-w-xs"
             variant="outline"
           >
@@ -69,6 +87,20 @@ const Index = () => {
           className="mr-4 bg-gray-800 text-white max-w-xs"
         />
       </div>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Your Bet</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to bet {betAmount} on the {selectedSide} image?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleConfirmBet}>Confirm Bet</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
