@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
@@ -15,7 +15,10 @@ const Index = () => {
     return response.data;
   };
 
-  const { data: images, isLoading, isError } = useQuery(['images'], fetchImages);
+  const { data: images, isLoading, isError } = useQuery({
+    queryKey: ['images'],
+    queryFn: fetchImages
+  });
 
   const handleBet = (side: 'left' | 'right') => {
     if (!betAmount) {
