@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import React, { useState, useCallback } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,15 +8,14 @@ const Index = () => {
   const [betAmount, setBetAmount] = useState('');
   const { toast } = useToast()
 
-  const fetchImages = async () => {
-    const response = await axios.get('http://183.122.23.1:9001');
-    return response.data;
-  };
+  const getRandomImage = useCallback(() => {
+    const width = 400;
+    const height = 300;
+    return `https://picsum.photos/${width}/${height}?random=${Math.random()}`;
+  }, []);
 
-  const { data: images, isLoading, isError } = useQuery({
-    queryKey: ['images'],
-    queryFn: fetchImages
-  });
+  const [leftImage, setLeftImage] = useState(getRandomImage());
+  const [rightImage, setRightImage] = useState(getRandomImage());
 
   const handleBet = (side: 'left' | 'right') => {
     if (!betAmount) {
@@ -33,23 +30,23 @@ const Index = () => {
       title: "Bet placed!",
       description: `You bet ${betAmount} on the ${side} image.`,
     });
+    // Refresh images after bet
+    setLeftImage(getRandomImage());
+    setRightImage(getRandomImage());
   };
-
-  if (isLoading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  if (isError) return <div className="flex justify-center items-center h-screen">Error fetching images</div>;
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <h1 className="text-4xl font-bold text-center mb-8">Guess Which One is AI</h1>
       <div className="flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="w-full md:w-1/2">
-          <img src={images?.left} alt="Left Image" className="w-full h-64 object-cover rounded-lg" />
+          <img src={leftImage} alt="Left Image" className="w-full h-64 object-cover rounded-lg" />
           <Button onClick={() => handleBet('left')} className="mt-4 w-full">
             <ArrowLeft className="mr-2" /> Left
           </Button>
         </div>
         <div className="w-full md:w-1/2">
-          <img src={images?.right} alt="Right Image" className="w-full h-64 object-cover rounded-lg" />
+          <img src={rightImage} alt="Right Image" className="w-full h-64 object-cover rounded-lg" />
           <Button onClick={() => handleBet('right')} className="mt-4 w-full">
             Right <ArrowRight className="ml-2" />
           </Button>
